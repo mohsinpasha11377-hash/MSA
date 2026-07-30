@@ -706,28 +706,78 @@ textarea {
 }
 
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  html,
   body {
     background: #fff !important;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   body::before,
   .sidebar,
+  .topbar,
   .topbar .actions,
   .no-print,
-  .mobile-toggle {
+  .mobile-toggle,
+  .backdrop {
     display: none !important;
   }
 
   .app-shell {
     display: block;
+    min-height: 0;
   }
 
   .main {
-    padding: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .split {
+    display: block !important;
   }
 
   .doc-sheet {
-    box-shadow: none;
-    border: 0;
+    box-shadow: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    width: 100%;
+    max-width: 186mm;
+    min-height: auto;
+    margin: 0 auto;
+    padding: 0 !important;
+    overflow: visible;
+    page-break-inside: avoid;
+  }
+
+  .doc-sheet::before {
+    display: none;
+  }
+
+  .doc-logo {
+    width: 28mm;
+    box-shadow: none !important;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
   }
 }
