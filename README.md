@@ -4,11 +4,11 @@
 
 ## Live app
 
-**https://eloquent-seahorse-a10d23.netlify.app**  
+**https://unrivaled-donut-9d84bb.netlify.app**  
 Password: `My-Drop-Site`
 
 Claim this site (required within 60 minutes to keep it live):  
-https://app.netlify.com/drop/eloquent-seahorse-a10d23#drop_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3ODU0MTczNzMsImV4cCI6MTc4NTQyMDk3MywiaXNzIjoiTmV0bGlmeSIsInNlc3Npb25faWQiOiJmMzM0ZjFiYi1mNTY0LTRhMGMtOTJlZi02MmM0ODhlYWNmZDYifQ.oBRp6EIOEx8H47mSSESwbKywfVk33EoYOgyz7PSmuvY
+https://app.netlify.com/drop/unrivaled-donut-9d84bb#drop_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3ODU0MTc5MjYsImV4cCI6MTc4NTQyMTUyNiwiaXNzIjoiTmV0bGlmeSIsInNlc3Npb25faWQiOiI2NzM4NzVkMC1hZjA3LTQwY2MtOGU0Ny01ZmJiNGU4ZjJhNGEifQ.eWd_DkYjhThmjwkIoDad66GztxFMq6QaH5dHOjLzPcM
 
 **Permanent hosting (GitHub Pages):** enable *Settings → Pages → Deploy from branch → `gh-pages` / root*, then visit:
 https://mohsinpasha11377-hash.github.io/MSA/

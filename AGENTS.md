@@ -6,7 +6,7 @@ Guidance for AI agents working in this repository.
 
 **MSA** is a quote, bill, and invoice web application. It is a client-side Vite + React + TypeScript SPA. Document data is stored in `localStorage` (key `msa-app-data-v2`).
 
-Live (Netlify drop): https://eloquent-seahorse-a10d23.netlify.app (password `My-Drop-Site`)
+Live (Netlify drop): https://unrivaled-donut-9d84bb.netlify.app (password `My-Drop-Site`)
 
 GitHub Pages (enable Pages → branch `gh-pages`): https://mohsinpasha11377-hash.github.io/MSA/
 
