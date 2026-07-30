@@ -4,11 +4,11 @@
 
 ## Live app
 
-**https://voluble-zabaione-8ff807.netlify.app**  
+**https://eloquent-seahorse-a10d23.netlify.app**  
 Password: `My-Drop-Site`
 
 Claim this site (required within 60 minutes to keep it live):  
-https://app.netlify.com/drop/voluble-zabaione-8ff807#drop_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3ODU0MTY0MDcsImV4cCI6MTc4NTQyMDAwNywiaXNzIjoiTmV0bGlmeSIsInNlc3Npb25faWQiOiI0MmFiYTRkMC0yMWEyLTQzNzctYjc1Zi00ZWViNDRhNWQ0NzMifQ.gSL3W_MUVzi7nh3-9MOgWaEaAzd00jrEfCjytkrOYxU
+https://app.netlify.com/drop/eloquent-seahorse-a10d23#drop_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3ODU0MTczNzMsImV4cCI6MTc4NTQyMDk3MywiaXNzIjoiTmV0bGlmeSIsInNlc3Npb25faWQiOiJmMzM0ZjFiYi1mNTY0LTRhMGMtOTJlZi02MmM0ODhlYWNmZDYifQ.oBRp6EIOEx8H47mSSESwbKywfVk33EoYOgyz7PSmuvY
 
 **Permanent hosting (GitHub Pages):** enable *Settings → Pages → Deploy from branch → `gh-pages` / root*, then visit:
 https://mohsinpasha11377-hash.github.io/MSA/
