@@ -4,11 +4,11 @@
 
 ## Live app
 
-**https://funny-ganache-114e12.netlify.app**  
+**https://voluble-zabaione-8ff807.netlify.app**  
 Password: `My-Drop-Site`
 
 Claim this site (required within 60 minutes to keep it live):  
-https://app.netlify.com/drop/funny-ganache-114e12#drop_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3ODU0MTQ1OTUsImV4cCI6MTc4NTQxODE5NSwiaXNzIjoiTmV0bGlmeSIsInNlc3Npb25faWQiOiI5M2Y0MTUwMS05NDE4LTRhODctOTQ1ZS0wNDIzZmJiNmU3ZjEifQ.UlZrttiQ4Amm7sN4ZhqFqDhDlNj5xVb435Ram8l1PHs
+https://app.netlify.com/drop/voluble-zabaione-8ff807#drop_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3ODU0MTY0MDcsImV4cCI6MTc4NTQyMDAwNywiaXNzIjoiTmV0bGlmeSIsInNlc3Npb25faWQiOiI0MmFiYTRkMC0yMWEyLTQzNzctYjc1Zi00ZWViNDRhNWQ0NzMifQ.gSL3W_MUVzi7nh3-9MOgWaEaAzd00jrEfCjytkrOYxU
 
 **Permanent hosting (GitHub Pages):** enable *Settings → Pages → Deploy from branch → `gh-pages` / root*, then visit:
 https://mohsinpasha11377-hash.github.io/MSA/
