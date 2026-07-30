@@ -3,7 +3,29 @@ import { Link, useNavigate } from 'react-router-dom'
 import { StatusBadge } from '../components/StatusBadge'
 import { useApp } from '../context/AppContext'
 import { formatCurrency, formatDate, grandTotal } from '../lib/utils'
-import type { DocumentType } from '../types'
+import type { Document, DocumentType } from '../types'
+
+function DocActions({ doc }: { doc: Document }) {
+  const navigate = useNavigate()
+  return (
+    <div className="actions">
+      <button
+        type="button"
+        className="btn btn-secondary btn-sm"
+        onClick={() => navigate(`/documents/${doc.id}`)}
+      >
+        Edit
+      </button>
+      <button
+        type="button"
+        className="btn btn-primary btn-sm"
+        onClick={() => navigate(`/documents/${doc.id}?print=1`)}
+      >
+        Print
+      </button>
+    </div>
+  )
+}
 
 export function Dashboard() {
   const navigate = useNavigate()
@@ -13,7 +35,6 @@ export function Dashboard() {
   const stats = useMemo(() => {
     const invoices = data.documents.filter((d) => d.type === 'invoice')
     const quotes = data.documents.filter((d) => d.type === 'quote')
-    const bills = data.documents.filter((d) => d.type === 'bill')
     const outstanding = invoices
       .filter((d) => d.status === 'sent' || d.status === 'overdue')
       .reduce((s, d) => s + grandTotal(d.items, d.taxRate), 0)
@@ -23,8 +44,6 @@ export function Dashboard() {
     return {
       clients: data.clients.length,
       quotes: quotes.length,
-      invoices: invoices.length,
-      bills: bills.length,
       outstanding,
       paid,
     }
@@ -48,7 +67,9 @@ export function Dashboard() {
       <div className="topbar">
         <div>
           <h1>MSA</h1>
-          <p>Quotes, bills, and invoices for {data.business.name} — settled cleanly.</p>
+          <p>
+            Quotes, bills, and invoices for {data.business.name} — interior &amp; exterior works.
+          </p>
         </div>
         <div className="actions">
           <button type="button" className="btn btn-secondary" onClick={() => create('quote')}>
@@ -104,6 +125,7 @@ export function Dashboard() {
                   <th>Due</th>
                   <th>Status</th>
                   <th>Total</th>
+                  <th className="no-print">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -121,6 +143,9 @@ export function Dashboard() {
                         <StatusBadge status={doc.status} />
                       </td>
                       <td>{formatCurrency(grandTotal(doc.items, doc.taxRate), currency)}</td>
+                      <td className="no-print">
+                        <DocActions doc={doc} />
+                      </td>
                     </tr>
                   )
                 })}
@@ -154,9 +179,9 @@ export function DocumentListPage({ type }: { type: DocumentType }) {
         <div>
           <h1>{title}</h1>
           <p>
-            {type === 'quote' && 'Propose work, track acceptances, convert to invoices.'}
-            {type === 'invoice' && 'Bill clients and track what has been paid.'}
-            {type === 'bill' && 'Track amounts you owe vendors and partners.'}
+            {type === 'quote' && 'Propose interior & exterior work with measurements, then convert to invoices.'}
+            {type === 'invoice' && 'Edit invoices anytime, track payment, and print branded PDFs.'}
+            {type === 'bill' && 'Track payables for materials and vendor work with units of measurement.'}
           </p>
         </div>
         <div className="actions">
@@ -203,6 +228,7 @@ export function DocumentListPage({ type }: { type: DocumentType }) {
                   <th>Due</th>
                   <th>Status</th>
                   <th>Total</th>
+                  <th className="no-print">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -221,6 +247,9 @@ export function DocumentListPage({ type }: { type: DocumentType }) {
                       </td>
                       <td>
                         {formatCurrency(grandTotal(doc.items, doc.taxRate), data.business.currency)}
+                      </td>
+                      <td className="no-print">
+                        <DocActions doc={doc} />
                       </td>
                     </tr>
                   )

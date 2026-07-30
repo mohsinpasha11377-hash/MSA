@@ -38,7 +38,7 @@ export function addDaysISO(days: number, from = todayISO()): string {
 }
 
 export function lineTotal(item: LineItem): number {
-  return (Number(item.quantity) || 0) * (Number(item.unitPrice) || 0)
+  return (Number(item.measurement) || 0) * (Number(item.unitPrice) || 0)
 }
 
 export function subtotal(items: LineItem[]): number {
@@ -83,5 +83,21 @@ export function statusTone(status: string): 'neutral' | 'info' | 'success' | 'wa
     case 'draft':
     default:
       return 'neutral'
+  }
+}
+
+/** Normalize legacy line items that used `quantity` instead of `measurement`. */
+export function normalizeLineItem(raw: Partial<LineItem> & { quantity?: number; id?: string }): LineItem {
+  const measurement =
+    raw.measurement !== undefined && raw.measurement !== null
+      ? Number(raw.measurement)
+      : Number(raw.quantity ?? 0)
+
+  return {
+    id: raw.id || uid('li'),
+    description: raw.description || '',
+    measurement: Number.isFinite(measurement) ? measurement : 0,
+    unit: raw.unit || 'Nos',
+    unitPrice: Number(raw.unitPrice) || 0,
   }
 }

@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { formatCurrency, formatDate, grandTotal, uid } from '../lib/utils'
+import { formatCurrency, formatDate, grandTotal, lineTotal, uid } from '../lib/utils'
 import type { Document, DocumentStatus, DocumentType, LineItem } from '../types'
+import { MEASUREMENT_UNITS } from '../types'
 import { DocumentPreview } from './DocumentPreview'
 
 const statusOptions: Record<DocumentType, DocumentStatus[]> = {
@@ -38,7 +39,16 @@ export function DocumentEditor({ doc }: { doc: Document }) {
   function addItem() {
     setDraft((prev) => ({
       ...prev,
-      items: [...prev.items, { id: uid('li'), description: '', quantity: 1, unitPrice: 0 }],
+      items: [
+        ...prev.items,
+        {
+          id: uid('li'),
+          description: '',
+          measurement: 1,
+          unit: 'Sq.Ft',
+          unitPrice: 0,
+        },
+      ],
     }))
   }
 
@@ -60,20 +70,22 @@ export function DocumentEditor({ doc }: { doc: Document }) {
     if (invoice) navigate(`/documents/${invoice.id}`)
   }
 
+  const typeLabel = draft.type[0].toUpperCase() + draft.type.slice(1)
+
   return (
     <div className="split">
       <div className="panel no-print">
         <div className="panel-head">
           <h2>
-            Edit {draft.type} · {draft.number}
+            Edit {typeLabel} · {draft.number}
           </h2>
           <div className="actions">
             {savedFlash ? <span className="badge badge-success">Saved</span> : null}
-            <button type="button" className="btn btn-secondary btn-sm" onClick={() => window.print()}>
-              Print
+            <button type="button" className="btn btn-secondary btn-sm" onClick={save}>
+              Save edits
             </button>
-            <button type="button" className="btn btn-primary btn-sm" onClick={save}>
-              Save
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => window.print()}>
+              Print
             </button>
           </div>
         </div>
@@ -155,24 +167,41 @@ export function DocumentEditor({ doc }: { doc: Document }) {
           </div>
           <div className="items-editor">
             {draft.items.map((item) => (
-              <div className="item-row" key={item.id}>
-                <label>
+              <div className="item-row item-row-meas" key={item.id}>
+                <label className="item-desc">
                   Description
                   <input
                     value={item.description}
                     onChange={(e) => updateItem(item.id, { description: e.target.value })}
-                    placeholder="Service or product"
+                    placeholder="Work / material description"
                   />
                 </label>
                 <label>
-                  Qty
+                  Measurement
                   <input
                     type="number"
                     min={0}
-                    step={1}
-                    value={item.quantity}
-                    onChange={(e) => updateItem(item.id, { quantity: Number(e.target.value) })}
+                    step="any"
+                    value={item.measurement}
+                    onChange={(e) => updateItem(item.id, { measurement: Number(e.target.value) })}
                   />
+                </label>
+                <label>
+                  Unit of measurement
+                  <select
+                    value={item.unit}
+                    onChange={(e) => updateItem(item.id, { unit: e.target.value })}
+                  >
+                    {MEASUREMENT_UNITS.map((u) => (
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
+                    ))}
+                    {!MEASUREMENT_UNITS.includes(item.unit as (typeof MEASUREMENT_UNITS)[number]) &&
+                    item.unit ? (
+                      <option value={item.unit}>{item.unit}</option>
+                    ) : null}
+                  </select>
                 </label>
                 <label>
                   Rate
@@ -188,12 +217,12 @@ export function DocumentEditor({ doc }: { doc: Document }) {
                   Amount
                   <input
                     readOnly
-                    value={formatCurrency(item.quantity * item.unitPrice, data.business.currency)}
+                    value={formatCurrency(lineTotal(item), data.business.currency)}
                   />
                 </label>
                 <button
                   type="button"
-                  className="btn btn-ghost btn-sm"
+                  className="btn btn-ghost btn-sm item-remove"
                   onClick={() => removeItem(item.id)}
                   aria-label="Remove line"
                 >
@@ -215,6 +244,12 @@ export function DocumentEditor({ doc }: { doc: Document }) {
           <Link className="btn btn-secondary" to={`/${draft.type}s`}>
             Back
           </Link>
+          <button type="button" className="btn btn-secondary" onClick={save}>
+            Save edits
+          </button>
+          <button type="button" className="btn btn-primary" onClick={() => window.print()}>
+            Print / PDF
+          </button>
           {draft.type === 'quote' ? (
             <button type="button" className="btn btn-primary" onClick={onConvert}>
               Convert to invoice

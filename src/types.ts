@@ -12,7 +12,10 @@ export type DocumentStatus =
 export interface LineItem {
   id: string
   description: string
-  quantity: number
+  /** Numeric measurement / quantity of work */
+  measurement: number
+  /** Unit of measurement, e.g. Sq.Ft, R.Ft, Nos */
+  unit: string
   unitPrice: number
 }
 
@@ -57,3 +60,16 @@ export interface AppData {
   business: BusinessProfile
   counters: Record<DocumentType, number>
 }
+
+/** Common units for interior / exterior works */
+export const MEASUREMENT_UNITS = [
+  'Sq.Ft',
+  'Sq.M',
+  'R.Ft',
+  'R.M',
+  'Nos',
+  'Cu.Ft',
+  'Cu.M',
+  'Job',
+  'Lumpsum',
+] as const

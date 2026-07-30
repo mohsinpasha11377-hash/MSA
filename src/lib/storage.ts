@@ -1,10 +1,10 @@
-import type { AppData, BusinessProfile, Client, Document } from '../types'
-import { addDaysISO, todayISO, uid } from './utils'
+import type { AppData, BusinessProfile, Client, Document, LineItem } from '../types'
+import { addDaysISO, normalizeLineItem, todayISO, uid } from './utils'
 
-const STORAGE_KEY = 'msa-app-data-v1'
+const STORAGE_KEY = 'msa-app-data-v2'
 
 export const defaultBusiness: BusinessProfile = {
-  name: 'Intercorp Services',
+  name: 'MSA Interior and Exterior',
   email: 'mohsin@intercorpservices.in',
   phone: '+91 00000 00000',
   address: 'India',
@@ -44,15 +44,24 @@ function seedData(): AppData {
     items: [
       {
         id: uid('li'),
-        description: 'Brand website redesign',
-        quantity: 1,
-        unitPrice: 85000,
+        description: 'Living room false ceiling',
+        measurement: 420,
+        unit: 'Sq.Ft',
+        unitPrice: 180,
       },
       {
         id: uid('li'),
-        description: 'Content migration & QA',
-        quantity: 1,
-        unitPrice: 18000,
+        description: 'Wall panelling — teak finish',
+        measurement: 180,
+        unit: 'Sq.Ft',
+        unitPrice: 320,
+      },
+      {
+        id: uid('li'),
+        description: 'Skirting installation',
+        measurement: 64,
+        unit: 'R.Ft',
+        unitPrice: 95,
       },
     ],
     taxRate: 18,
@@ -72,15 +81,17 @@ function seedData(): AppData {
     items: [
       {
         id: uid('li'),
-        description: 'Monthly retainer — July',
-        quantity: 1,
-        unitPrice: 45000,
+        description: 'Exterior facade painting',
+        measurement: 1250,
+        unit: 'Sq.Ft',
+        unitPrice: 45,
       },
       {
         id: uid('li'),
-        description: 'Priority support hours',
-        quantity: 8,
-        unitPrice: 1500,
+        description: 'Waterproofing — terrace',
+        measurement: 680,
+        unit: 'Sq.Ft',
+        unitPrice: 65,
       },
     ],
     taxRate: 18,
@@ -100,13 +111,14 @@ function seedData(): AppData {
     items: [
       {
         id: uid('li'),
-        description: 'Cloud hosting — Q3',
-        quantity: 1,
-        unitPrice: 12500,
+        description: 'Premium plywood supply',
+        measurement: 48,
+        unit: 'Nos',
+        unitPrice: 1850,
       },
     ],
     taxRate: 18,
-    notes: 'Vendor payable — cloud infrastructure.',
+    notes: 'Vendor payable — material supply.',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
@@ -119,18 +131,27 @@ function seedData(): AppData {
   }
 }
 
+function migrateDocuments(docs: Document[]): Document[] {
+  return docs.map((doc) => ({
+    ...doc,
+    items: (doc.items || []).map((item) =>
+      normalizeLineItem(item as LineItem & { quantity?: number }),
+    ),
+  }))
+}
+
 export function loadData(): AppData {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem('msa-app-data-v1')
     if (!raw) {
       const seeded = seedData()
       saveData(seeded)
       return seeded
     }
     const parsed = JSON.parse(raw) as AppData
-    return {
-      ...seedData(),
-      ...parsed,
+    const migrated: AppData = {
+      clients: parsed.clients ?? [],
+      documents: migrateDocuments(parsed.documents ?? []),
       business: { ...defaultBusiness, ...parsed.business },
       counters: {
         quote: parsed.counters?.quote ?? 1,
@@ -138,6 +159,12 @@ export function loadData(): AppData {
         invoice: parsed.counters?.invoice ?? 1,
       },
     }
+    // Prefer MSA brand name if still on old default
+    if (migrated.business.name === 'Intercorp Services') {
+      migrated.business.name = defaultBusiness.name
+    }
+    saveData(migrated)
+    return migrated
   } catch {
     return seedData()
   }

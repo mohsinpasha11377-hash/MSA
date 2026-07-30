@@ -36,7 +36,13 @@ interface AppContextValue {
 const AppContext = createContext<AppContextValue | null>(null)
 
 function blankItem(): LineItem {
-  return { id: uid('li'), description: '', quantity: 1, unitPrice: 0 }
+  return {
+    id: uid('li'),
+    description: '',
+    measurement: 1,
+    unit: 'Sq.Ft',
+    unitPrice: 0,
+  }
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -171,6 +177,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const resetDemoData = useCallback(() => {
     localStorage.removeItem('msa-app-data-v1')
+    localStorage.removeItem('msa-app-data-v2')
     setData(loadData())
   }, [])
 

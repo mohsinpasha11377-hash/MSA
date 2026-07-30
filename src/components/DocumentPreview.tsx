@@ -1,19 +1,22 @@
 import { useApp } from '../context/AppContext'
-import { documentLabel, formatCurrency, formatDate, grandTotal } from '../lib/utils'
+import { documentLabel, formatCurrency, formatDate, grandTotal, lineTotal, subtotal } from '../lib/utils'
 import type { Document } from '../types'
 import { StatusBadge } from './StatusBadge'
+import { MsaLogo } from './MsaLogo'
 
 export function DocumentPreview({ doc }: { doc: Document }) {
   const { data, getClient } = useApp()
   const client = getClient(doc.clientId)
   const currency = data.business.currency
+  const sub = subtotal(doc.items)
+  const total = grandTotal(doc.items, doc.taxRate)
 
   return (
     <article className="doc-sheet">
       <div className="doc-header">
-        <div>
-          <div className="msa">MSA</div>
-          <p style={{ margin: '0.35rem 0 0', color: 'var(--ink-soft)', whiteSpace: 'pre-line' }}>
+        <div className="doc-brand">
+          <MsaLogo className="doc-logo" />
+          <p className="doc-business">
             <strong>{data.business.name}</strong>
             {'\n'}
             {data.business.address}
@@ -57,7 +60,8 @@ export function DocumentPreview({ doc }: { doc: Document }) {
           <thead>
             <tr>
               <th>Description</th>
-              <th>Qty</th>
+              <th>Measurement</th>
+              <th>Unit</th>
               <th>Rate</th>
               <th>Amount</th>
             </tr>
@@ -66,9 +70,10 @@ export function DocumentPreview({ doc }: { doc: Document }) {
             {doc.items.map((item) => (
               <tr key={item.id}>
                 <td>{item.description || '—'}</td>
-                <td>{item.quantity}</td>
+                <td>{item.measurement || 0}</td>
+                <td>{item.unit || '—'}</td>
                 <td>{formatCurrency(item.unitPrice, currency)}</td>
-                <td>{formatCurrency(item.quantity * item.unitPrice, currency)}</td>
+                <td>{formatCurrency(lineTotal(item), currency)}</td>
               </tr>
             ))}
           </tbody>
@@ -78,26 +83,15 @@ export function DocumentPreview({ doc }: { doc: Document }) {
       <div className="totals">
         <div>
           <span>Subtotal</span>
-          <span>
-            {formatCurrency(
-              doc.items.reduce((s, i) => s + i.quantity * i.unitPrice, 0),
-              currency,
-            )}
-          </span>
+          <span>{formatCurrency(sub, currency)}</span>
         </div>
         <div>
           <span>Tax ({doc.taxRate}%)</span>
-          <span>
-            {formatCurrency(
-              grandTotal(doc.items, doc.taxRate) -
-                doc.items.reduce((s, i) => s + i.quantity * i.unitPrice, 0),
-              currency,
-            )}
-          </span>
+          <span>{formatCurrency(total - sub, currency)}</span>
         </div>
         <div className="grand">
           <span>Total</span>
-          <span>{formatCurrency(grandTotal(doc.items, doc.taxRate), currency)}</span>
+          <span>{formatCurrency(total, currency)}</span>
         </div>
       </div>
 

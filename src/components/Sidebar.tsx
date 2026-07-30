@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { MsaLogo } from './MsaLogo'
 
 const links = [
   { to: '/', label: 'Overview', end: true },
@@ -21,10 +22,10 @@ export function Sidebar({
       {open ? <div className="backdrop" onClick={onClose} aria-hidden /> : null}
       <aside className={`sidebar${open ? ' open' : ''}`}>
         <div className="brand">
-          <div className="brand-mark">MSA</div>
+          <MsaLogo compact className="brand-logo" />
           <div className="brand-text">
             <strong>MSA</strong>
-            <span>Quote · Bill · Invoice</span>
+            <span>Interior &amp; Exterior</span>
           </div>
         </div>
 
@@ -37,8 +38,8 @@ export function Sidebar({
         </nav>
 
         <div className="sidebar-foot">
-          Documents stay on this device. Export or print anytime —
-          no account required.
+          Quotes, bills &amp; invoices for MSA Interior and Exterior.
+          Data stays on this device.
         </div>
       </aside>
     </>
