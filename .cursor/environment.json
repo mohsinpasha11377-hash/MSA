@@ -1,4 +1,4 @@
 {
-  "name": "INTERATS",
+  "name": "InterManagement",
   "install": "if [ -f package.json ]; then npm install; else true; fi"
 }
