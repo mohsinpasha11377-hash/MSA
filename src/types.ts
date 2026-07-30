@@ -6,8 +6,17 @@ export type DocumentStatus =
   | 'accepted'
   | 'declined'
   | 'paid'
+  | 'partial'
   | 'overdue'
   | 'void'
+
+export type PaymentMethod =
+  | 'cash'
+  | 'upi'
+  | 'bank_transfer'
+  | 'cheque'
+  | 'card'
+  | 'other'
 
 export interface LineItem {
   id: string
@@ -42,6 +51,25 @@ export interface Document {
   notes: string
   createdAt: string
   updatedAt: string
+  /** Original quote/invoice this final balance invoice is based on */
+  parentDocumentId?: string
+  /** True when this invoice is a final bill after advances */
+  isFinalBalance?: boolean
+  /** Amount already received that is deducted on this final invoice */
+  advanceCredit?: number
+}
+
+export interface Payment {
+  id: string
+  number: string
+  /** Quote or invoice this payment applies to */
+  documentId: string
+  clientId: string
+  amount: number
+  method: PaymentMethod
+  receivedDate: string
+  notes: string
+  createdAt: string
 }
 
 export interface BusinessProfile {
@@ -57,8 +85,9 @@ export interface BusinessProfile {
 export interface AppData {
   clients: Client[]
   documents: Document[]
+  payments: Payment[]
   business: BusinessProfile
-  counters: Record<DocumentType, number>
+  counters: Record<DocumentType | 'receipt', number>
 }
 
 /** Common units for interior / exterior works */
@@ -73,3 +102,12 @@ export const MEASUREMENT_UNITS = [
   'Job',
   'Lumpsum',
 ] as const
+
+export const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
+  { value: 'cash', label: 'Cash' },
+  { value: 'upi', label: 'UPI' },
+  { value: 'bank_transfer', label: 'Bank transfer' },
+  { value: 'cheque', label: 'Cheque' },
+  { value: 'card', label: 'Card' },
+  { value: 'other', label: 'Other' },
+]

@@ -20,7 +20,8 @@ https://mohsinpasha11377-hash.github.io/MSA/
 - **Bills** — track payables to vendors
 - **Clients** — contact directory
 - **Business settings** — name, address, tax ID, currency, default tax
-- **Print / PDF** — print-ready layout (browser → Save as PDF)
+- **Print / PDF** — A4 print-ready layout (browser → Save as PDF)
+- **Share on WhatsApp** — generates an A4 PDF and shares via WhatsApp (all document types)
 
 ## Develop
 

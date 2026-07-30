@@ -3,7 +3,7 @@ import { findDocumentPreviewElement, shareDocumentOnWhatsApp } from '../lib/shar
 import type { Document } from '../types'
 
 type ShareWhatsAppButtonProps = {
-  doc: Document
+  doc: Pick<Document, 'number' | 'type'>
   businessName: string
   /** Ref to a container that holds .doc-sheet */
   previewRef?: RefObject<HTMLElement | null>

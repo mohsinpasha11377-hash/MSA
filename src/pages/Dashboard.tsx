@@ -179,7 +179,7 @@ export function DocumentListPage({ type }: { type: DocumentType }) {
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
   }, [data.documents, status, type])
 
-  const statuses = ['all', 'draft', 'sent', 'paid', 'accepted', 'overdue', 'declined', 'void']
+  const statuses = ['all', 'draft', 'sent', 'partial', 'paid', 'accepted', 'overdue', 'declined', 'void']
 
   return (
     <>

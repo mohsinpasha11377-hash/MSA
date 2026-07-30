@@ -1,7 +1,7 @@
-import type { AppData, BusinessProfile, Client, Document, LineItem } from '../types'
+import type { AppData, BusinessProfile, Client, Document, LineItem, Payment } from '../types'
 import { addDaysISO, normalizeLineItem, todayISO, uid } from './utils'
 
-const STORAGE_KEY = 'msa-app-data-v2'
+const STORAGE_KEY = 'msa-app-data-v3'
 
 export const defaultBusiness: BusinessProfile = {
   name: 'MSA Interior and Exterior',
@@ -74,7 +74,7 @@ function seedData(): AppData {
     id: uid('doc'),
     number: 'INV-0001',
     type: 'invoice',
-    status: 'paid',
+    status: 'partial',
     clientId: clientB.id,
     issueDate: addDaysISO(-20),
     dueDate: addDaysISO(-5),
@@ -123,11 +123,24 @@ function seedData(): AppData {
     updatedAt: new Date().toISOString(),
   }
 
+  const payment: Payment = {
+    id: uid('pay'),
+    number: 'RCP-0001',
+    documentId: invoice.id,
+    clientId: clientB.id,
+    amount: 40000,
+    method: 'upi',
+    receivedDate: addDaysISO(-10),
+    notes: 'Advance against facade painting.',
+    createdAt: new Date().toISOString(),
+  }
+
   return {
     clients: [clientA, clientB],
     documents: [quote, invoice, bill],
+    payments: [payment],
     business: defaultBusiness,
-    counters: { quote: 2, bill: 2, invoice: 2 },
+    counters: { quote: 2, bill: 2, invoice: 2, receipt: 2 },
   }
 }
 
@@ -142,24 +155,28 @@ function migrateDocuments(docs: Document[]): Document[] {
 
 export function loadData(): AppData {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem('msa-app-data-v1')
+    const raw =
+      localStorage.getItem(STORAGE_KEY) ??
+      localStorage.getItem('msa-app-data-v2') ??
+      localStorage.getItem('msa-app-data-v1')
     if (!raw) {
       const seeded = seedData()
       saveData(seeded)
       return seeded
     }
-    const parsed = JSON.parse(raw) as AppData
+    const parsed = JSON.parse(raw) as Partial<AppData>
     const migrated: AppData = {
       clients: parsed.clients ?? [],
       documents: migrateDocuments(parsed.documents ?? []),
+      payments: parsed.payments ?? [],
       business: { ...defaultBusiness, ...parsed.business },
       counters: {
         quote: parsed.counters?.quote ?? 1,
         bill: parsed.counters?.bill ?? 1,
         invoice: parsed.counters?.invoice ?? 1,
+        receipt: parsed.counters?.receipt ?? 1,
       },
     }
-    // Prefer MSA brand name if still on old default
     if (migrated.business.name === 'Intercorp Services') {
       migrated.business.name = defaultBusiness.name
     }

@@ -1,13 +1,20 @@
 import { documentLabel } from './utils'
 import type { Document } from '../types'
 
-export function pdfFilename(doc: Document): string {
+type ShareableDoc = Pick<Document, 'number' | 'type'>
+
+export function pdfFilename(doc: ShareableDoc): string {
   return `MSA-${doc.number}.pdf`
+}
+
+function shareLabel(doc: ShareableDoc): string {
+  if (doc.number.startsWith('RCP')) return 'Payment Receipt'
+  return documentLabel(doc.type)
 }
 
 export async function generateDocumentPdf(
   element: HTMLElement,
-  doc: Document,
+  doc: ShareableDoc,
 ): Promise<File> {
   const html2pdf = (await import('html2pdf.js')).default
   const filename = pdfFilename(doc)
@@ -47,11 +54,11 @@ function openWhatsAppWithMessage(message: string): void {
 }
 
 export async function shareDocumentOnWhatsApp(
-  doc: Document,
+  doc: ShareableDoc,
   element: HTMLElement,
   businessName: string,
 ): Promise<'shared' | 'whatsapp-fallback' | 'cancelled'> {
-  const label = documentLabel(doc.type)
+  const label = shareLabel(doc)
   const file = await generateDocumentPdf(element, doc)
   const message = `${label} ${doc.number} from ${businessName}. Please find the PDF attached.`
 
@@ -72,7 +79,6 @@ export async function shareDocumentOnWhatsApp(
       if (err instanceof DOMException && err.name === 'AbortError') {
         return 'cancelled'
       }
-      // Fall through to WhatsApp link fallback
     }
   }
 

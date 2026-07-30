@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { formatCurrency, formatDate, grandTotal, lineTotal, uid } from '../lib/utils'
+import { formatCurrency, formatDate, grandTotal, lineTotal, uid, balanceForDocument, totalPaidForDocument, paymentsForDocument } from '../lib/utils'
 import type { Document, DocumentStatus, DocumentType, LineItem } from '../types'
 import { MEASUREMENT_UNITS } from '../types'
 import { DocumentPreview } from './DocumentPreview'
 import { ShareWhatsAppButton } from './ShareWhatsAppButton'
 
 const statusOptions: Record<DocumentType, DocumentStatus[]> = {
-  quote: ['draft', 'sent', 'accepted', 'declined', 'void'],
-  invoice: ['draft', 'sent', 'paid', 'overdue', 'void'],
+  quote: ['draft', 'sent', 'accepted', 'partial', 'declined', 'void'],
+  invoice: ['draft', 'sent', 'partial', 'paid', 'overdue', 'void'],
   bill: ['draft', 'sent', 'paid', 'overdue', 'void'],
 }
 
@@ -27,6 +27,7 @@ export function DocumentEditor({
     deleteDocument,
     convertQuoteToInvoice,
     setDocumentStatus,
+    createFinalInvoice,
   } = useApp()
   const [draft, setDraft] = useState<Document>(doc)
   const [savedFlash, setSavedFlash] = useState(false)
@@ -36,6 +37,10 @@ export function DocumentEditor({
     () => grandTotal(draft.items, draft.taxRate),
     [draft.items, draft.taxRate],
   )
+
+  useEffect(() => {
+    setDraft(doc)
+  }, [doc])
 
   useEffect(() => {
     if (!autoWhatsApp) return
@@ -87,7 +92,17 @@ export function DocumentEditor({
     if (invoice) navigate(`/documents/${invoice.id}`)
   }
 
+  function onFinalInvoice() {
+    save()
+    const finalInv = createFinalInvoice(draft.id)
+    if (finalInv) navigate(`/documents/${finalInv.id}`)
+  }
+
   const typeLabel = draft.type[0].toUpperCase() + draft.type.slice(1)
+  const docPayments = paymentsForDocument(data.payments, draft.id)
+  const paidTotal = totalPaidForDocument(data.payments, draft.id)
+  const balanceDue = balanceForDocument(draft, data.payments)
+  const canTakePayments = draft.type === 'quote' || draft.type === 'invoice'
 
   return (
     <div className="split">
@@ -263,6 +278,61 @@ export function DocumentEditor({
             <div style={{ fontSize: '0.85rem' }}>Updated {formatDate(draft.updatedAt)}</div>
           </div>
         </div>
+
+        {canTakePayments ? (
+          <div className="payment-panel" style={{ marginTop: '1.25rem' }}>
+            <div className="panel-head">
+              <h2>Payments received</h2>
+              <Link className="btn btn-secondary btn-sm" to={`/payments?doc=${draft.id}`}>
+                Record payment
+              </Link>
+            </div>
+            <div className="payment-summary">
+              <span>Received {formatCurrency(paidTotal, data.business.currency)}</span>
+              <span>Balance {formatCurrency(balanceDue, data.business.currency)}</span>
+            </div>
+            {docPayments.length === 0 ? (
+              <p className="payment-empty">No payments recorded against this {draft.type} yet.</p>
+            ) : (
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Receipt</th>
+                      <th>Date</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {docPayments.map((p) => (
+                      <tr key={p.id}>
+                        <td>
+                          <Link to={`/payments/${p.id}`}>{p.number}</Link>
+                        </td>
+                        <td>{formatDate(p.receivedDate)}</td>
+                        <td>{formatCurrency(p.amount, data.business.currency)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {paidTotal > 0 && !draft.isFinalBalance ? (
+              <div className="actions" style={{ marginTop: '0.85rem' }}>
+                <button type="button" className="btn btn-primary" onClick={onFinalInvoice}>
+                  Generate final invoice (deduct received)
+                </button>
+              </div>
+            ) : null}
+            {draft.isFinalBalance ? (
+              <p className="payment-empty">
+                This is a final invoice. Advances of{' '}
+                {formatCurrency(draft.advanceCredit || 0, data.business.currency)} are deducted on
+                the preview.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="actions" style={{ marginTop: '1.25rem' }}>
           <Link className="btn btn-secondary" to={`/${draft.type}s`}>

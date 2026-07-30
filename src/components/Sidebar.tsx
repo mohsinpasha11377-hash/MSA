@@ -6,6 +6,7 @@ const links = [
   { to: '/quotes', label: 'Quotes' },
   { to: '/invoices', label: 'Invoices' },
   { to: '/bills', label: 'Bills' },
+  { to: '/payments', label: 'Payments' },
   { to: '/clients', label: 'Clients' },
   { to: '/settings', label: 'Settings' },
 ]

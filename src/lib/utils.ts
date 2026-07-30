@@ -1,4 +1,5 @@
-import type { DocumentType, LineItem } from '../types'
+import type { Document, DocumentType, LineItem, Payment, PaymentMethod } from '../types'
+import { PAYMENT_METHODS } from '../types'
 
 export function uid(prefix = 'id'): string {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36).slice(-4)}`
@@ -53,6 +54,27 @@ export function grandTotal(items: LineItem[], taxRate: number): number {
   return subtotal(items) + taxAmount(items, taxRate)
 }
 
+/** Gross total minus advance credit on final invoices */
+export function amountDue(doc: Document): number {
+  const gross = grandTotal(doc.items, doc.taxRate)
+  const credit = Number(doc.advanceCredit) || 0
+  return Math.max(0, gross - credit)
+}
+
+export function paymentsForDocument(payments: Payment[], documentId: string): Payment[] {
+  return payments.filter((p) => p.documentId === documentId)
+}
+
+export function totalPaidForDocument(payments: Payment[], documentId: string): number {
+  return paymentsForDocument(payments, documentId).reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
+}
+
+export function balanceForDocument(doc: Document, payments: Payment[]): number {
+  if (doc.isFinalBalance) return amountDue(doc)
+  const gross = grandTotal(doc.items, doc.taxRate)
+  return Math.max(0, gross - totalPaidForDocument(payments, doc.id))
+}
+
 export function documentLabel(type: DocumentType): string {
   switch (type) {
     case 'quote':
@@ -64,9 +86,14 @@ export function documentLabel(type: DocumentType): string {
   }
 }
 
-export function nextNumber(type: DocumentType, counter: number): string {
-  const prefix = type === 'quote' ? 'QT' : type === 'bill' ? 'BL' : 'INV'
+export function nextNumber(type: DocumentType | 'receipt', counter: number): string {
+  const prefix =
+    type === 'quote' ? 'QT' : type === 'bill' ? 'BL' : type === 'receipt' ? 'RCP' : 'INV'
   return `${prefix}-${String(counter).padStart(4, '0')}`
+}
+
+export function paymentMethodLabel(method: PaymentMethod): string {
+  return PAYMENT_METHODS.find((m) => m.value === method)?.label ?? method
 }
 
 export function statusTone(status: string): 'neutral' | 'info' | 'success' | 'warn' | 'danger' {
@@ -76,6 +103,8 @@ export function statusTone(status: string): 'neutral' | 'info' | 'success' | 'wa
       return 'success'
     case 'sent':
       return 'info'
+    case 'partial':
+      return 'warn'
     case 'overdue':
     case 'declined':
     case 'void':

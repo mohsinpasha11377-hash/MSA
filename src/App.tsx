@@ -5,6 +5,7 @@ import { AppProvider } from './context/AppContext'
 import { ClientsPage } from './pages/ClientsPage'
 import { Dashboard, DocumentListPage } from './pages/Dashboard'
 import { DocumentPage } from './pages/DocumentPage'
+import { PaymentReceiptPage, PaymentsPage } from './pages/PaymentsPage'
 import { SettingsPage } from './pages/SettingsPage'
 
 function Shell() {
@@ -27,6 +28,8 @@ function Shell() {
           <Route path="/quotes" element={<DocumentListPage type="quote" />} />
           <Route path="/invoices" element={<DocumentListPage type="invoice" />} />
           <Route path="/bills" element={<DocumentListPage type="bill" />} />
+          <Route path="/payments" element={<PaymentsPage />} />
+          <Route path="/payments/:id" element={<PaymentReceiptPage />} />
           <Route path="/clients" element={<ClientsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/documents/:id" element={<DocumentPage />} />
