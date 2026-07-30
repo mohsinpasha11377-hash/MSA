@@ -6,14 +6,16 @@ Guidance for AI agents working in this repository.
 
 **MSA** is a quote, bill, and invoice web application. It is a client-side Vite + React + TypeScript SPA. Document data is stored in `localStorage` (key `msa-app-data-v1`).
 
-Live URL (GitHub Pages): https://mohsinpasha11377-hash.github.io/MSA/
+Live (Netlify drop): https://cozy-lokum-18385d.netlify.app (password `My-Drop-Site`)
+
+GitHub Pages (enable Pages → branch `gh-pages`): https://mohsinpasha11377-hash.github.io/MSA/
 
 ## Stack
 
 - Vite 8 + React 19 + TypeScript
-- React Router (`basename="/MSA"`)
+- React Router (`HashRouter`)
 - Oxlint
-- Deployed with `gh-pages` to branch `gh-pages`
+- Deployed with `gh-pages` + optional Netlify drop
 
 ## Commands
 
@@ -30,7 +32,8 @@ Live URL (GitHub Pages): https://mohsinpasha11377-hash.github.io/MSA/
 
 - After pulling changes, run `npm install`.
 - No backend or Docker services are required.
-- Vite `base` is `/MSA/` for GitHub Pages — keep router basename in sync (`src/main.tsx`).
+- Vite uses relative `base: './'` so the same build works on GitHub Pages and root hosts.
+- Routing uses `HashRouter` for static hosting compatibility (no server rewrite needed).
 - SPA fallback for Pages: `predeploy` copies `dist/index.html` → `dist/404.html`.
 
 ## Source layout

@@ -197,7 +197,7 @@ export function DocumentEditor({ doc }: { doc: Document }) {
                   onClick={() => removeItem(item.id)}
                   aria-label="Remove line"
                 >
-                  ✕
+                  Remove
                 </button>
               </div>
             ))}

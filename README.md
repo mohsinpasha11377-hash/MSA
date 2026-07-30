@@ -4,16 +4,22 @@
 
 ## Live app
 
+**https://cozy-lokum-18385d.netlify.app**  
+Password: `My-Drop-Site`
+
+> Anonymous Netlify drops expire unless claimed. Open the claim link from the deploy output (or Settings → claim) within 60 minutes to keep it permanently.
+
+**Permanent hosting (GitHub Pages):** enable *Settings → Pages → Deploy from branch → `gh-pages` / root*, then visit:
 https://mohsinpasha11377-hash.github.io/MSA/
 
 ## Features
 
-- **Quotes** — draft proposals, track status, convert accepted quotes into invoices
+- **Quotes** — draft proposals, track status, convert to invoices
 - **Invoices** — bill clients, track sent / paid / overdue
 - **Bills** — track payables to vendors
-- **Clients** — simple contact directory
-- **Business settings** — name, address, tax ID, currency, default tax rate
-- **Print / PDF** — print-ready document layout
+- **Clients** — contact directory
+- **Business settings** — name, address, tax ID, currency, default tax
+- **Print / PDF** — print-ready layout (browser → Save as PDF)
 
 ## Develop
 
@@ -22,14 +28,12 @@ npm install
 npm run dev
 ```
 
-## Build & deploy (GitHub Pages)
+## Build & deploy
 
 ```bash
 npm run build
-npm run deploy
+npm run deploy   # publishes dist/ to the gh-pages branch
 ```
-
-The site is published from the `gh-pages` branch to `/MSA/`.
 
 ## Scripts
 
