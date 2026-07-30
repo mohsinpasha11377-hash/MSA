@@ -23,6 +23,14 @@ function DocActions({ doc }: { doc: Document }) {
       >
         Print
       </button>
+      <button
+        type="button"
+        className="btn btn-whatsapp btn-sm"
+        onClick={() => navigate(`/documents/${doc.id}?whatsapp=1`)}
+        title="Generate A4 PDF and share on WhatsApp"
+      >
+        WhatsApp
+      </button>
     </div>
   )
 }

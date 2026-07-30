@@ -295,6 +295,31 @@ h3,
   color: var(--danger);
 }
 
+.btn-whatsapp {
+  background: linear-gradient(135deg, #128c7e 0%, #25d366 100%);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(37, 211, 102, 0.28);
+}
+
+.btn-whatsapp:disabled {
+  opacity: 0.7;
+  cursor: wait;
+  transform: none;
+}
+
+.share-wa-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.share-wa-status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--success);
+}
+
 .btn-sm {
   padding: 0.45rem 0.85rem;
   font-size: 0.9rem;

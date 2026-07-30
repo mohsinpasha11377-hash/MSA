@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { formatCurrency, formatDate, grandTotal, lineTotal, uid } from '../lib/utils'
 import type { Document, DocumentStatus, DocumentType, LineItem } from '../types'
 import { MEASUREMENT_UNITS } from '../types'
 import { DocumentPreview } from './DocumentPreview'
+import { ShareWhatsAppButton } from './ShareWhatsAppButton'
 
 const statusOptions: Record<DocumentType, DocumentStatus[]> = {
   quote: ['draft', 'sent', 'accepted', 'declined', 'void'],
@@ -12,7 +13,13 @@ const statusOptions: Record<DocumentType, DocumentStatus[]> = {
   bill: ['draft', 'sent', 'paid', 'overdue', 'void'],
 }
 
-export function DocumentEditor({ doc }: { doc: Document }) {
+export function DocumentEditor({
+  doc,
+  autoWhatsApp = false,
+}: {
+  doc: Document
+  autoWhatsApp?: boolean
+}) {
   const navigate = useNavigate()
   const {
     data,
@@ -23,11 +30,21 @@ export function DocumentEditor({ doc }: { doc: Document }) {
   } = useApp()
   const [draft, setDraft] = useState<Document>(doc)
   const [savedFlash, setSavedFlash] = useState(false)
+  const previewWrapRef = useRef<HTMLDivElement>(null)
 
   const total = useMemo(
     () => grandTotal(draft.items, draft.taxRate),
     [draft.items, draft.taxRate],
   )
+
+  useEffect(() => {
+    if (!autoWhatsApp) return
+    const timer = window.setTimeout(() => {
+      const btn = document.querySelector<HTMLButtonElement>('[data-share-whatsapp="true"]')
+      btn?.click()
+    }, 500)
+    return () => window.clearTimeout(timer)
+  }, [autoWhatsApp])
 
   function updateItem(id: string, patch: Partial<LineItem>) {
     setDraft((prev) => ({
@@ -87,6 +104,13 @@ export function DocumentEditor({ doc }: { doc: Document }) {
             <button type="button" className="btn btn-primary btn-sm" onClick={() => window.print()}>
               Print
             </button>
+            <ShareWhatsAppButton
+              doc={draft}
+              businessName={data.business.name}
+              previewRef={previewWrapRef}
+              size="sm"
+              onBeforeShare={save}
+            />
           </div>
         </div>
 
@@ -250,6 +274,12 @@ export function DocumentEditor({ doc }: { doc: Document }) {
           <button type="button" className="btn btn-primary" onClick={() => window.print()}>
             Print / PDF
           </button>
+          <ShareWhatsAppButton
+            doc={draft}
+            businessName={data.business.name}
+            previewRef={previewWrapRef}
+            onBeforeShare={save}
+          />
           {draft.type === 'quote' ? (
             <button type="button" className="btn btn-primary" onClick={onConvert}>
               Convert to invoice
@@ -268,7 +298,9 @@ export function DocumentEditor({ doc }: { doc: Document }) {
         </div>
       </div>
 
-      <DocumentPreview doc={draft} />
+      <div ref={previewWrapRef}>
+        <DocumentPreview doc={draft} />
+      </div>
     </div>
   )
 }
