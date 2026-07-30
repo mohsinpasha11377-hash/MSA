@@ -4,10 +4,11 @@
 
 ## Live app
 
-**https://cozy-lokum-18385d.netlify.app**  
+**https://funny-ganache-114e12.netlify.app**  
 Password: `My-Drop-Site`
 
-> Anonymous Netlify drops expire unless claimed. Open the claim link from the deploy output (or Settings → claim) within 60 minutes to keep it permanently.
+Claim this site (required within 60 minutes to keep it live):  
+https://app.netlify.com/drop/funny-ganache-114e12#drop_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3ODU0MTQ1OTUsImV4cCI6MTc4NTQxODE5NSwiaXNzIjoiTmV0bGlmeSIsInNlc3Npb25faWQiOiI5M2Y0MTUwMS05NDE4LTRhODctOTQ1ZS0wNDIzZmJiNmU3ZjEifQ.UlZrttiQ4Amm7sN4ZhqFqDhDlNj5xVb435Ram8l1PHs
 
 **Permanent hosting (GitHub Pages):** enable *Settings → Pages → Deploy from branch → `gh-pages` / root*, then visit:
 https://mohsinpasha11377-hash.github.io/MSA/
