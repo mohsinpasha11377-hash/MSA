@@ -4,7 +4,7 @@ Guidance for AI agents working in this repository.
 
 ## Project overview
 
-**MSA** is a quote, bill, and invoice web application. It is a client-side Vite + React + TypeScript SPA. Document data is stored in `localStorage` (key `msa-app-data-v2`).
+**MSA** is a quote, bill, and invoice web application. It is a client-side Vite + React + TypeScript SPA. Document data is stored in `localStorage` (key `msa-app-data-v3`).
 
 Live (Netlify drop): https://unrivaled-donut-9d84bb.netlify.app (password `My-Drop-Site`)
 
