@@ -1,0 +1,376 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useApp } from '../context/AppContext'
+import { formatCurrency, formatDate, grandTotal, lineTotal, uid, balanceForDocument, totalPaidForDocument, paymentsForDocument } from '../lib/utils'
+import type { Document, DocumentStatus, DocumentType, LineItem } from '../types'
+import { MEASUREMENT_UNITS } from '../types'
+import { DocumentPreview } from './DocumentPreview'
+import { ShareWhatsAppButton } from './ShareWhatsAppButton'
+
+const statusOptions: Record<DocumentType, DocumentStatus[]> = {
+  quote: ['draft', 'sent', 'accepted', 'partial', 'declined', 'void'],
+  invoice: ['draft', 'sent', 'partial', 'paid', 'overdue', 'void'],
+  bill: ['draft', 'sent', 'paid', 'overdue', 'void'],
+}
+
+export function DocumentEditor({
+  doc,
+  autoWhatsApp = false,
+}: {
+  doc: Document
+  autoWhatsApp?: boolean
+}) {
+  const navigate = useNavigate()
+  const {
+    data,
+    upsertDocument,
+    deleteDocument,
+    convertQuoteToInvoice,
+    setDocumentStatus,
+    createFinalInvoice,
+  } = useApp()
+  const [draft, setDraft] = useState<Document>(doc)
+  const [savedFlash, setSavedFlash] = useState(false)
+  const previewWrapRef = useRef<HTMLDivElement>(null)
+
+  const total = useMemo(
+    () => grandTotal(draft.items, draft.taxRate),
+    [draft.items, draft.taxRate],
+  )
+
+  useEffect(() => {
+    setDraft(doc)
+  }, [doc])
+
+  useEffect(() => {
+    if (!autoWhatsApp) return
+    const timer = window.setTimeout(() => {
+      const btn = document.querySelector<HTMLButtonElement>('[data-share-whatsapp="true"]')
+      btn?.click()
+    }, 500)
+    return () => window.clearTimeout(timer)
+  }, [autoWhatsApp])
+
+  function updateItem(id: string, patch: Partial<LineItem>) {
+    setDraft((prev) => ({
+      ...prev,
+      items: prev.items.map((item) => (item.id === id ? { ...item, ...patch } : item)),
+    }))
+  }
+
+  function addItem() {
+    setDraft((prev) => ({
+      ...prev,
+      items: [
+        ...prev.items,
+        {
+          id: uid('li'),
+          description: '',
+          measurement: 1,
+          unit: 'Sq.Ft',
+          unitPrice: 0,
+        },
+      ],
+    }))
+  }
+
+  function removeItem(id: string) {
+    setDraft((prev) => ({
+      ...prev,
+      items: prev.items.length <= 1 ? prev.items : prev.items.filter((i) => i.id !== id),
+    }))
+  }
+
+  function save() {
+    upsertDocument(draft)
+    setSavedFlash(true)
+    window.setTimeout(() => setSavedFlash(false), 1600)
+  }
+
+  function onConvert() {
+    const invoice = convertQuoteToInvoice(draft.id)
+    if (invoice) navigate(`/documents/${invoice.id}`)
+  }
+
+  function onFinalInvoice() {
+    save()
+    const finalInv = createFinalInvoice(draft.id)
+    if (finalInv) navigate(`/documents/${finalInv.id}`)
+  }
+
+  const typeLabel = draft.type[0].toUpperCase() + draft.type.slice(1)
+  const docPayments = paymentsForDocument(data.payments, draft.id)
+  const paidTotal = totalPaidForDocument(data.payments, draft.id)
+  const balanceDue = balanceForDocument(draft, data.payments)
+  const canTakePayments = draft.type === 'quote' || draft.type === 'invoice'
+
+  return (
+    <div className="split">
+      <div className="panel no-print">
+        <div className="panel-head">
+          <h2>
+            Edit {typeLabel} · {draft.number}
+          </h2>
+          <div className="actions">
+            {savedFlash ? <span className="badge badge-success">Saved</span> : null}
+            <button type="button" className="btn btn-secondary btn-sm" onClick={save}>
+              Save edits
+            </button>
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => window.print()}>
+              Print
+            </button>
+            <ShareWhatsAppButton
+              doc={draft}
+              businessName={data.business.name}
+              previewRef={previewWrapRef}
+              size="sm"
+              onBeforeShare={save}
+            />
+          </div>
+        </div>
+
+        <div className="form-grid">
+          <label>
+            Client
+            <select
+              value={draft.clientId}
+              onChange={(e) => setDraft({ ...draft, clientId: e.target.value })}
+            >
+              <option value="">Select client</option>
+              {data.clients.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.company || c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Status
+            <select
+              value={draft.status}
+              onChange={(e) => {
+                const status = e.target.value as DocumentStatus
+                setDraft({ ...draft, status })
+                setDocumentStatus(draft.id, status)
+              }}
+            >
+              {statusOptions[draft.type].map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Issue date
+            <input
+              type="date"
+              value={draft.issueDate}
+              onChange={(e) => setDraft({ ...draft, issueDate: e.target.value })}
+            />
+          </label>
+          <label>
+            Due date
+            <input
+              type="date"
+              value={draft.dueDate}
+              onChange={(e) => setDraft({ ...draft, dueDate: e.target.value })}
+            />
+          </label>
+          <label>
+            Tax rate (%)
+            <input
+              type="number"
+              min={0}
+              step={0.01}
+              value={draft.taxRate}
+              onChange={(e) => setDraft({ ...draft, taxRate: Number(e.target.value) })}
+            />
+          </label>
+          <label className="full">
+            Notes
+            <textarea
+              value={draft.notes}
+              onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
+              placeholder="Payment terms, validity, bank details…"
+            />
+          </label>
+        </div>
+
+        <div style={{ marginTop: '1.1rem' }}>
+          <div className="panel-head">
+            <h2>Line items</h2>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={addItem}>
+              Add line
+            </button>
+          </div>
+          <div className="items-editor">
+            {draft.items.map((item) => (
+              <div className="item-row item-row-meas" key={item.id}>
+                <label className="item-desc">
+                  Description
+                  <input
+                    value={item.description}
+                    onChange={(e) => updateItem(item.id, { description: e.target.value })}
+                    placeholder="Work / material description"
+                  />
+                </label>
+                <label>
+                  Measurement
+                  <input
+                    type="number"
+                    min={0}
+                    step="any"
+                    value={item.measurement}
+                    onChange={(e) => updateItem(item.id, { measurement: Number(e.target.value) })}
+                  />
+                </label>
+                <label>
+                  Unit of measurement
+                  <select
+                    value={item.unit}
+                    onChange={(e) => updateItem(item.id, { unit: e.target.value })}
+                  >
+                    {MEASUREMENT_UNITS.map((u) => (
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
+                    ))}
+                    {!MEASUREMENT_UNITS.includes(item.unit as (typeof MEASUREMENT_UNITS)[number]) &&
+                    item.unit ? (
+                      <option value={item.unit}>{item.unit}</option>
+                    ) : null}
+                  </select>
+                </label>
+                <label>
+                  Rate
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={item.unitPrice}
+                    onChange={(e) => updateItem(item.id, { unitPrice: Number(e.target.value) })}
+                  />
+                </label>
+                <label>
+                  Amount
+                  <input
+                    readOnly
+                    value={formatCurrency(lineTotal(item), data.business.currency)}
+                  />
+                </label>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm item-remove"
+                  onClick={() => removeItem(item.id)}
+                  aria-label="Remove line"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="totals">
+            <div className="grand">
+              <span>Total</span>
+              <span>{formatCurrency(total, data.business.currency)}</span>
+            </div>
+            <div style={{ fontSize: '0.85rem' }}>Updated {formatDate(draft.updatedAt)}</div>
+          </div>
+        </div>
+
+        {canTakePayments ? (
+          <div className="payment-panel" style={{ marginTop: '1.25rem' }}>
+            <div className="panel-head">
+              <h2>Payments received</h2>
+              <Link className="btn btn-secondary btn-sm" to={`/payments?doc=${draft.id}`}>
+                Record payment
+              </Link>
+            </div>
+            <div className="payment-summary">
+              <span>Received {formatCurrency(paidTotal, data.business.currency)}</span>
+              <span>Balance {formatCurrency(balanceDue, data.business.currency)}</span>
+            </div>
+            {docPayments.length === 0 ? (
+              <p className="payment-empty">No payments recorded against this {draft.type} yet.</p>
+            ) : (
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Receipt</th>
+                      <th>Date</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {docPayments.map((p) => (
+                      <tr key={p.id}>
+                        <td>
+                          <Link to={`/payments/${p.id}`}>{p.number}</Link>
+                        </td>
+                        <td>{formatDate(p.receivedDate)}</td>
+                        <td>{formatCurrency(p.amount, data.business.currency)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {paidTotal > 0 && !draft.isFinalBalance ? (
+              <div className="actions" style={{ marginTop: '0.85rem' }}>
+                <button type="button" className="btn btn-primary" onClick={onFinalInvoice}>
+                  Generate final invoice (deduct received)
+                </button>
+              </div>
+            ) : null}
+            {draft.isFinalBalance ? (
+              <p className="payment-empty">
+                This is a final invoice. Advances of{' '}
+                {formatCurrency(draft.advanceCredit || 0, data.business.currency)} are deducted on
+                the preview.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="actions" style={{ marginTop: '1.25rem' }}>
+          <Link className="btn btn-secondary" to={`/${draft.type}s`}>
+            Back
+          </Link>
+          <button type="button" className="btn btn-secondary" onClick={save}>
+            Save edits
+          </button>
+          <button type="button" className="btn btn-primary" onClick={() => window.print()}>
+            Print / PDF
+          </button>
+          <ShareWhatsAppButton
+            doc={draft}
+            businessName={data.business.name}
+            previewRef={previewWrapRef}
+            onBeforeShare={save}
+          />
+          {draft.type === 'quote' ? (
+            <button type="button" className="btn btn-primary" onClick={onConvert}>
+              Convert to invoice
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={() => {
+              deleteDocument(draft.id)
+              navigate(`/${draft.type}s`)
+            }}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <div ref={previewWrapRef}>
+        <DocumentPreview doc={draft} />
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 360" role="img" aria-label="MSA Interior and Exterior">
+  <rect width="320" height="360" fill="#0B1C3A"/>
+  <!-- Skyline -->
+  <g fill="none" stroke="#F3EDE3" stroke-width="3.2" stroke-linejoin="miter">
+    <!-- Building 1 -->
+    <path d="M48 148 V78 H92 V148"/>
+    <path d="M58 98 H82 M58 112 H82 M58 126 H82"/>
+    <!-- Building 2 (tall with slanted top) -->
+    <path d="M98 148 V42 L138 58 V148"/>
+    <path d="M110 78 H128 M110 94 H128 M110 110 H128 M110 126 H128"/>
+    <!-- Building 3 -->
+    <path d="M148 148 V64 H198 V148"/>
+    <path d="M160 84 H186 M160 100 H186 M160 116 H186 M160 132 H186"/>
+    <!-- Building 4 -->
+    <path d="M208 148 V88 H272 V148"/>
+    <path d="M220 108 H260 M220 122 H260 M220 136 H260"/>
+  </g>
+  <line x1="48" y1="156" x2="272" y2="156" stroke="#F3EDE3" stroke-width="2.4"/>
+  <!-- MSA wordmark -->
+  <text x="160" y="230" text-anchor="middle" fill="#F3EDE3" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="700" letter-spacing="4">MSA</text>
+  <!-- Tagline -->
+  <text x="160" y="278" text-anchor="middle" fill="#F3EDE3" font-family="Helvetica, Arial, sans-serif" font-size="16" letter-spacing="4.5">INTERIOR AND</text>
+  <text x="160" y="308" text-anchor="middle" fill="#F3EDE3" font-family="Helvetica, Arial, sans-serif" font-size="16" letter-spacing="4.5">  EXTERIOR  </text>
+</svg>
